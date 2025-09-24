@@ -25,12 +25,22 @@ jobs:
     
       - name: Build project
         run: npm run build
+
+      - name: Verify build output
+        run: ls -la ./build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app
+          path: build
     
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        id: deploy-to-github-pages
+        uses: actions/deploy-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'Deploy to GitHub Pages'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifact_name: app
+
+      - name: Log deployment URL
+        run: echo "Deployed to GitHub Pages at ${{ steps.deploy-to-github-pages.outputs.page_url }}"
