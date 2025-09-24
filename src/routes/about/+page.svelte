@@ -1,8 +1,18 @@
 <script lang="ts">
-  import { calculateAllPlayerScores, getPredictionBreakdown } from '$lib/data/scoring.js';
-  import { onMount } from 'svelte';
+  import { calculateAllPlayerScores, getPredictionBreakdown } from '$lib/data/scoring';
+  import { players } from '$lib/data/players';
+  import PlayerBracket from '$lib/components/PlayerBracket.svelte';
+  import * as Dialog from '$lib/components/ui/dialog/index.js';
+  import Button from '$lib/components/ui/button/button.svelte';
   
   let playerScores = $state(calculateAllPlayerScores());
+  let showPlayerBracketDialog = $state(false);
+  let selectedPlayer = $state(null as any);
+  
+  function showPlayerBracket(playerName: string) {
+    selectedPlayer = players.find(p => p.name === playerName);
+    showPlayerBracketDialog = true;
+  }
 </script>
 
 <svelte:head>
@@ -42,7 +52,10 @@
 				<tbody>
 					{#each playerScores as player, index}
 						{@const breakdown = getPredictionBreakdown(player)}
-						<tr class="border-t hover:bg-slate-50 {index === 0 ? 'bg-yellow-50' : ''}">
+						<tr 
+							class="border-t hover:bg-blue-50 cursor-pointer transition-colors {index === 0 ? 'bg-yellow-50 hover:bg-yellow-100' : ''}"
+							onclick={() => showPlayerBracket(player.playerName)}
+						>
 							<td class="p-4">
 								{#if index === 0}
 									<span class="text-2xl">🥇</span>
@@ -59,7 +72,9 @@
 									<span class="bg-blue-500 text-white text-sm px-3 py-1 rounded-full font-medium">
 										{player.initials}
 									</span>
-									<span class="font-medium text-slate-800">{player.playerName}</span>
+									<span class="font-medium text-slate-800">
+										{player.playerName}
+									</span>
 								</div>
 							</td>
 							<td class="p-4 text-center">
@@ -126,8 +141,24 @@
 	</div>
 
 	<div class="text-center mt-8">
-		<a href="/bracket" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+		<a href="/fbw/bracket" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
 			View Tournament Bracket
 		</a>
 	</div>
 </div>
+
+<!-- Player Bracket Dialog -->
+<Dialog.Root bind:open={showPlayerBracketDialog}>
+	<Dialog.Content class="max-w-6xl max-h-[90vh] overflow-y-auto">
+		<Dialog.Header>
+			<Dialog.Title>
+				{#if selectedPlayer}
+					{selectedPlayer.name}'s Bracket
+				{/if}
+			</Dialog.Title>
+		</Dialog.Header>
+		{#if selectedPlayer}
+			<PlayerBracket player={selectedPlayer} />
+		{/if}
+	</Dialog.Content>
+</Dialog.Root>

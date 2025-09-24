@@ -1,4 +1,6 @@
 // Tournament winners data - hardcoded results
+import { p } from './players.js';
+
 export interface TournamentResults {
   round1Winners: number[]; // competitor IDs that win first round matches
   round2Winners: number[]; // competitor IDs that win quarterfinal matches  
@@ -10,19 +12,19 @@ export interface TournamentResults {
 // Predefined tournament results based on the 12-competitor bracket
 export const tournamentWinners: TournamentResults = {
   // First Round winners (4 matches)
-  round1Winners: [0, 3, 5, 7], // 128 Jr, 909, 901, 856
+  round1Winners: [p(-1), -1, p(901), -1], // 128 Jr, 909, 901, 856
   
   // Quarterfinals winners (4 matches) - includes byes from round 2
-  round2Winners: [0, 8, 3, 10], // 128 Jr, 602, 909, 32
+  round2Winners: [-1, -1, -1, -1], // 128 Jr, 602, 909, 32
   
   // Semifinals winners (2 matches)
-  round3Winners: [8, 10], // 602, 32
+  round3Winners: [-1, -1], // 602, 32
   
   // Finals winner (1 match)
-  round4Winner: 8, // 602
+  round4Winner: -1, // 602
   
   // Overall champion
-  champion: 8 // 602
+  champion: -1 // 602
 };
 
 // Bear images mapping - each competitor gets a bear image based on their name prefix

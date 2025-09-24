@@ -7,7 +7,7 @@ export interface PlayerResults {
     picks: TournamentResults;
 }
 
-const p = (n: number): number => {
+export const p = (n: number): number => {
     return ({
         '-1': 0,
         '609': 1,

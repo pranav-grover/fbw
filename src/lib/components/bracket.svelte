@@ -29,7 +29,7 @@
   
   // Initial 12 competitors
   let initialCompetitors: Competitor[] = $state([
-    { id: 0, name: '128Jr' },
+    { id: 0, name: '128 Jr' },
     { id: 1, name: '609' },
     { id: 2, name: '26' },
     { id: 3, name: '909' },
@@ -334,7 +334,6 @@
             <h4 class="text-lg font-bold text-slate-800 mb-1">
               {bearDisplayNames[selectedMatch.competitor1.id]}
             </h4>
-            <p class="text-sm text-slate-600 mb-2">ID: {selectedMatch.competitor1.id}</p>
             {#if selectedMatch.winner?.id === selectedMatch.competitor1.id}
               <span class="inline-block bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
                 🏆 WINNER
