@@ -141,7 +141,7 @@
 	</div>
 
 	<div class="text-center mt-8">
-		<a href="/bracket" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+		<a href="/" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
 			View Tournament Bracket
 		</a>
 	</div>
