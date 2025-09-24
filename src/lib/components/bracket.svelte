@@ -186,7 +186,7 @@
         
         <div class="matches-container flex flex-wrap gap-4 justify-center">
           {#each matches as match, matchIndex}
-            <div class="match-card bg-white rounded-lg shadow-md p-4 border-2 border-slate-200 hover:border-slate-300 transition-colors min-w-[280px]">
+            <div class="match-card bg-white rounded-lg shadow-md p-4 border-2 border-slate-200 hover:border-slate-300 transition-colors min-w-[210px]">
               <div class="match-header text-center mb-3">
                 <span class="text-sm font-medium text-slate-500 uppercase tracking-wide">Match {matchIndex + 1}</span>
               </div>
@@ -321,16 +321,11 @@
       </Dialog.Description>
     </Dialog.Header>
     
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-1 gap-2 mt-6">
       <!-- Competitor 1 -->
       {#if selectedMatch.competitor1}
         <div class="bg-slate-50 rounded-lg p-4 {selectedMatch.winner?.id === selectedMatch.competitor1.id ? 'ring-2 ring-green-500 bg-green-50' : ''}">
           <div class="text-center">
-            <img 
-              src={bearImages[selectedMatch.competitor1.id]} 
-              alt={bearDisplayNames[selectedMatch.competitor1.id]}
-              class="w-full max-w-xs mx-auto rounded-lg shadow-md mb-3"
-            />
             <h4 class="text-lg font-bold text-slate-800 mb-1">
               {bearDisplayNames[selectedMatch.competitor1.id]}
             </h4>
@@ -339,6 +334,11 @@
                 🏆 WINNER
               </span>
             {/if}
+            <img 
+              src={bearImages[selectedMatch.competitor1.id]} 
+              alt={bearDisplayNames[selectedMatch.competitor1.id]}
+              class="w-full max-w-sm mx-auto rounded-lg shadow-md mt-3"
+            />
           </div>
         </div>
       {:else}
@@ -348,9 +348,15 @@
       {/if}
       
       <!-- VS Divider -->
-      <div class="md:hidden flex items-center justify-center py-2">
+      <div class="flex items-center justify-center py-2">
         <span class="text-2xl font-bold text-slate-400">VS</span>
       </div>
+
+    
+    <!-- VS Divider for desktop -->
+    <!-- <div class="hidden md:flex absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-4 border-slate-200 rounded-full w-16 h-16 items-center justify-center z-10">
+      <span class="text-xl font-bold text-slate-600">VS</span>
+    </div> -->
       
       <!-- Competitor 2 -->
       {#if selectedMatch.competitor2}
@@ -359,7 +365,7 @@
             <img 
               src={bearImages[selectedMatch.competitor2.id]} 
               alt={bearDisplayNames[selectedMatch.competitor2.id]}
-              class="w-full max-w-xs mx-auto rounded-lg shadow-md mb-3"
+              class="w-full max-w-sm mx-auto rounded-lg shadow-md mb-3"
             />
             <h4 class="text-lg font-bold text-slate-800 mb-1">
               {bearDisplayNames[selectedMatch.competitor2.id]}
@@ -376,11 +382,6 @@
           <span>Awaiting competitor...</span>
         </div>
       {/if}
-    </div>
-    
-    <!-- VS Divider for desktop -->
-    <div class="hidden md:flex absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-4 border-slate-200 rounded-full w-16 h-16 items-center justify-center z-10">
-      <span class="text-xl font-bold text-slate-600">VS</span>
     </div>
     
     <Dialog.Footer class="mt-6">
