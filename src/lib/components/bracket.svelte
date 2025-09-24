@@ -255,24 +255,24 @@
                               {correctPlayers[0]}
                             </span>
                           {:else if correctPlayers.length > 1}
-                            <Tooltip.Root>
-                              <Tooltip.Trigger asChild let:builder>
-                                <span 
-                                  use:builder.action 
-                                  {...builder}
-                                  class="bg-blue-500 text-white text-xs w-6 h-6 rounded-full font-medium flex items-center justify-center cursor-help"
-                                >
-                                  {correctPlayers.length}
-                                </span>
-                              </Tooltip.Trigger>
-                              <Tooltip.Content>
-                                <div class="flex flex-wrap gap-1">
-                                  {#each correctPlayers as initials}
-                                    <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{initials}</span>
-                                  {/each}
-                                </div>
-                              </Tooltip.Content>
-                            </Tooltip.Root>
+                            <Tooltip.Provider>
+                              <Tooltip.Root>
+                                <Tooltip.Trigger>
+                                  <span 
+                                    class="bg-blue-500 text-white text-xs w-6 h-6 rounded-full font-medium flex items-center justify-center cursor-help"
+                                  >
+                                    {correctPlayers.length}
+                                  </span>
+                                </Tooltip.Trigger>
+                                <Tooltip.Content>
+                                  <div class="flex flex-wrap gap-1">
+                                    {#each correctPlayers as initials}
+                                      <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">{initials}</span>
+                                    {/each}
+                                  </div>
+                                </Tooltip.Content>
+                              </Tooltip.Root>
+                            </Tooltip.Provider>
                           {/if}
                         </div>
                       {/if}
