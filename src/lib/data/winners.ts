@@ -29,18 +29,18 @@ export const tournamentWinners: TournamentResults = {
 
 // Bear images mapping - each competitor gets a bear image based on their name prefix
 export const bearImages: Record<number, string> = {
-  0: '/src/lib/images/bears/128grazer-1758560774361.png', // 128 Jr
-  1: '/src/lib/images/bears/609-1758562237210.png',       // 609
-  2: '/src/lib/images/bears/26-1758557305581.png',        // 26
-  3: '/src/lib/images/bears/909-1758562402990.png',       // 909
-  4: '/src/lib/images/bears/503-1758560839893.png',       // 503
-  5: '/src/lib/images/bears/901-1758562371329.png',       // 901
-  6: '/src/lib/images/bears/99-1758560720167.png',        // 99
-  7: '/src/lib/images/bears/856-1758562333630.png',       // 856
-  8: '/src/lib/images/bears/602-1758562266438.png',       // 602
-  9: '/src/lib/images/bears/128grazer-1758560774361.png', // 128 (using same as 128 Jr)
-  10: '/src/lib/images/bears/32chunk-1758560671158.png',  // 32
-  11: '/src/lib/images/bears/910-1758562455268.png'       // 910
+  0: '/bears/128grazer-1758560774361.png', // 128 Jr
+  1: '/bears/609-1758562237210.png',       // 609
+  2: '/bears/26-1758557305581.png',        // 26
+  3: '/bears/909-1758562402990.png',       // 909
+  4: '/bears/503-1758560839893.png',       // 503
+  5: '/bears/901-1758562371329.png',       // 901
+  6: '/bears/99-1758560720167.png',        // 99
+  7: '/bears/856-1758562333630.png',       // 856
+  8: '/bears/602-1758562266438.png',       // 602
+  9: '/bears/128grazer-1758560774361.png', // 128 (using same as 128 Jr)
+  10: '/bears/32chunk-1758560671158.png',  // 32
+  11: '/bears/910-1758562455268.png'       // 910
 };
 
 // Bear display names for the popup
