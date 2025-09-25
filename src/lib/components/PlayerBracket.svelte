@@ -163,7 +163,7 @@
     round2: [
       {
         id: 'round2_match1',
-        competitor1: initialCompetitors[8], // 32 (bye from R1)
+        competitor1: initialCompetitors[9], // 602 (bye from R1)
         competitor2: getActualWinner(1, 0), // Winner of 128Jr vs 609
         winner: getActualWinner(2, 0),
         playerPick: getPlayerPick(2, 0),
@@ -171,7 +171,7 @@
       },
       {
         id: 'round2_match2',
-        competitor1: initialCompetitors[9], // 602 (bye from R1)
+        competitor1: initialCompetitors[11], // 128 (bye from R1)
         competitor2: getActualWinner(1, 1), // Winner of 26 vs 909
         winner: getActualWinner(2, 1),
         playerPick: getPlayerPick(2, 1),
@@ -179,7 +179,7 @@
       },
       {
         id: 'round2_match3',
-        competitor1: initialCompetitors[10], // 910 (bye from R1)
+        competitor1: initialCompetitors[8], // 32 (bye from R1)
         competitor2: getActualWinner(1, 2), // Winner of 503 vs 901
         winner: getActualWinner(2, 2),
         playerPick: getPlayerPick(2, 2),
@@ -187,7 +187,7 @@
       },
       {
         id: 'round2_match4',
-        competitor1: initialCompetitors[11], // 128 (bye from R1)
+        competitor1: initialCompetitors[10], // 910 (bye from R1)
         competitor2: getActualWinner(1, 3), // Winner of 99 vs 856
         winner: getActualWinner(2, 3),
         playerPick: getPlayerPick(2, 3),
@@ -198,15 +198,15 @@
       {
         id: 'round3_match1',
         competitor1: getActualWinner(2, 0), // Winner of round2_match1
-        competitor2: getActualWinner(2, 1), // Winner of round2_match2
+        competitor2: getActualWinner(2, 2), // Winner of round2_match2
         winner: getActualWinner(3, 0),
         playerPick: getPlayerPick(3, 0),
         isCorrect: isPredictionCorrect(3, 0)
       },
       {
         id: 'round3_match2',
-        competitor1: getActualWinner(2, 2), // Winner of round2_match3
-        competitor2: getActualWinner(2, 3), // Winner of round2_match4
+        competitor1: getActualWinner(2, 1), // Winner of round2_match3
+        competitor2: getActualWinner(2, 4), // Winner of round2_match4
         winner: getActualWinner(3, 1),
         playerPick: getPlayerPick(3, 1),
         isCorrect: isPredictionCorrect(3, 1)
