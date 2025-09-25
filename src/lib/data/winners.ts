@@ -12,7 +12,7 @@ export interface TournamentResults {
 // Predefined tournament results based on the 12-competitor bracket
 export const tournamentWinners: TournamentResults = {
   // First Round winners (4 matches)
-  round1Winners: [p(-1), -1, p(901), -1], // 128 Jr, 909, 901, 856
+  round1Winners: [p(-1), p(909), p(901), p(856)], // 128 Jr, 909, 901, 856
   
   // Quarterfinals winners (4 matches) - includes byes from round 2
   round2Winners: [-1, -1, -1, -1], // 128 Jr, 602, 909, 32
