@@ -244,14 +244,14 @@
 
 <!-- Match Detail Dialog -->
 <Dialog.Root bind:open={showMatchDialog}>
-  <Dialog.Content class="max-w-5xl">
+  <Dialog.Content class="max-w-6xl sm:max-w-screen w-[90%]">
     <Dialog.Header>
       <Dialog.Title>
         {selectedMatch.roundName} - Match {selectedMatch.matchNumber}
       </Dialog.Title>
     </Dialog.Header>
     
-    <div class="space-y-6 p-4">
+    <div class="space-y-6 p-4 w-full">
       <!-- Match Status -->
       {#if selectedMatch.isCorrect !== null}
         <div class="text-center p-4 rounded-lg {selectedMatch.isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border">
