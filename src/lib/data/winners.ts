@@ -15,7 +15,7 @@ export const tournamentWinners: TournamentResults = {
   round1Winners: [p(-1), p(909), p(901), p(856)], // 128 Jr, 909, 901, 856
   
   // Quarterfinals winners (4 matches) - includes byes from round 2
-  round2Winners: [-1, -1, -1, -1], // 128 Jr, 602, 909, 32
+  round2Winners: [p(602), -1, p(32), -1], // 128 Jr, 602, 909, 32
   
   // Semifinals winners (2 matches)
   round3Winners: [-1, -1], // 602, 32
