@@ -103,12 +103,12 @@ export const tournamentStructure: TournamentStructure = {
       {
         id: 'semis_match1',
         competitor1: '602',    // Winner from quarters_match1
-        competitor2: '',       // Winner from quarters_match2 (TBD)
+        competitor2: '32',       // Winner from quarters_match2 (TBD)
         winner: '' // To be determined
       },
       {
         id: 'semis_match2', 
-        competitor1: '32',     // Winner from quarters_match3
+        competitor1: '',     // Winner from quarters_match3
         competitor2: '',       // Winner from quarters_match4 (TBD)
         winner: '' // To be determined
       }
