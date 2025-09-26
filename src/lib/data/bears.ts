@@ -10,7 +10,7 @@ export interface Bear {
 export const bears: Bear[] = [
   {
     id: '128Jr',
-    name: '128 Grazer Jr',
+    name: '128 Jr',
     shortName: '128 Jr',
     image: '/bears/128grazer-1758560774361.png'
   },

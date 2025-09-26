@@ -57,19 +57,20 @@
   }
   
   // Get champion data
-  const champion = $derived(() => {
+  const champion = $derived.by(() => {
     if (!tournamentStructure.champion) return null;
     return getBearData(tournamentStructure.champion);
   });
   
   const championPredictors = $derived(() => {
-    if (!tournamentStructure.champion) return [];
-    return players.filter((p) => p.championPick === tournamentStructure.champion);
+    if (!champion) return [];
+    return players.filter((p) => p.championPick === champion.id);
   });
 </script>
 
 <div class="bracket-container p-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
-  <h1 class="text-3xl font-bold text-center mb-8 text-slate-800">Tournament Bracket</h1>
+  <h1 class="text-3xl font-bold text-center mb-2 text-slate-800">Fat Bear Week 2025</h1>
+  <h6 class="text-sm text-center mb-8 text-slate-400">Click on a match to see the bears!</h6>
   
   {#each tournamentStructure.rounds as round}
     {@const matches = getMatchesForRound(round.id)}
@@ -80,7 +81,10 @@
       
       <div class="matches-container flex flex-wrap gap-4 justify-center">
         {#each matches as match, matchIndex}
-          <div class="match-card bg-white rounded-lg shadow-md p-4 border-2 border-slate-200 hover:border-slate-300 transition-colors min-w-[210px]">
+          <button 
+            class="match-card bg-white rounded-lg shadow-md p-4 border-2 border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 min-w-[210px] text-left cursor-pointer"
+            onclick={() => showMatchModal(round.id, matchIndex)}
+          >
             <div class="match-header text-center mb-3">
               <span class="text-sm font-medium text-slate-500 uppercase tracking-wide">Match {matchIndex + 1}</span>
             </div>
@@ -89,10 +93,7 @@
               <!-- Competitor 1 -->
               {#if getBearData(match.competitor1)}
                 {@const bear1 = getBearData(match.competitor1)}
-                <button 
-                  class="competitor w-full p-3 text-left rounded-md border-2 transition-all duration-200 {match.winner === match.competitor1 ? 'border-green-500 bg-green-50 text-green-800' : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100'}"
-                  onclick={() => showMatchModal(round.id, matchIndex)}
-                >
+                <div class="competitor w-full p-3 rounded-md border-2 transition-all duration-200 {match.winner === match.competitor1 ? 'border-green-500 bg-green-50 text-green-800' : 'border-slate-200 bg-slate-50'}">
                   <div class="flex items-center justify-between">
                     <span class="font-medium">{bear1?.name}</span>
                     {#if match.winner === match.competitor1}
@@ -126,7 +127,7 @@
                       </div>
                     {/if}
                   </div>
-                </button>
+                </div>
               {:else}
                 <div class="competitor w-full p-3 text-center rounded-md border-2 border-dashed border-slate-300 bg-slate-100 text-slate-500">
                   Awaiting competitor...
@@ -138,10 +139,7 @@
               <!-- Competitor 2 -->
               {#if getBearData(match.competitor2)}
                 {@const bear2 = getBearData(match.competitor2)}
-                <button 
-                  class="competitor w-full p-3 text-left rounded-md border-2 transition-all duration-200 {match.winner === match.competitor2 ? 'border-green-500 bg-green-50 text-green-800' : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100'}"
-                  onclick={() => showMatchModal(round.id, matchIndex)}
-                >
+                <div class="competitor w-full p-3 rounded-md border-2 transition-all duration-200 {match.winner === match.competitor2 ? 'border-green-500 bg-green-50 text-green-800' : 'border-slate-200 bg-slate-50'}">
                   <div class="flex items-center justify-between">
                     <span class="font-medium">{bear2?.name}</span>
                     {#if match.winner === match.competitor2}
@@ -175,14 +173,14 @@
                       </div>
                     {/if}
                   </div>
-                </button>
+                </div>
               {:else}
                 <div class="competitor w-full p-3 text-center rounded-md border-2 border-dashed border-slate-300 bg-slate-100 text-slate-500">
                   Awaiting competitor...
                 </div>
               {/if}
             </div>
-          </div>
+          </button>
         {/each}
       </div>
     </div>
@@ -190,7 +188,7 @@
   
   <!-- Champion Section -->
   {#if champion}
-    <div class="champion-section text-center mt-12 p-8 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 rounded-lg shadow-lg">
+    <div class="champion-section text-center mt-12 p-8 bg-gradient-to-r from-green-400 via-green-500 to-green-600 rounded-lg shadow-lg">
       <h2 class="text-2xl font-bold text-white mb-4">🏆 Tournament Champion 🏆</h2>
       <div class="champion-name text-3xl font-bold text-white bg-black bg-opacity-20 rounded-lg p-4 inline-block mb-4">
         {champion.name}

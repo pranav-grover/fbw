@@ -177,20 +177,20 @@
       
       <div class="matches-container flex flex-wrap gap-4 justify-center">
         {#each matches as match, matchIndex}
-          <div class="match-card bg-white rounded-lg shadow-md p-4 border-2 border-slate-200 hover:border-slate-300 transition-colors w-full max-w-md">
+          <button 
+            class="match-card bg-white rounded-lg shadow-md p-4 border-2 border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 w-full max-w-md cursor-pointer text-left"
+            onclick={() => showMatchModal(match, roundNames[roundKey], matchIndex)}
+            type="button"
+          >
             <div class="match-header text-center mb-3">
               <span class="text-sm font-medium text-slate-500 uppercase tracking-wide">Match {matchIndex + 1}</span>
+              <div class="text-xs text-blue-500 mt-1 opacity-70 font-medium">🔍 Click to view details</div>
               {#if match.isCorrect !== null}
                 <span class="ml-2 text-xs px-2 py-1 rounded-full {match.isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
                   {match.isCorrect ? '✓ Correct' : '✗ Wrong'}
                 </span>
               {/if}
             </div>
-            
-            <button 
-              class="w-full text-left"
-              onclick={() => showMatchModal(match, roundNames[roundKey], matchIndex)}
-            >
               <div class="competitors space-y-2">
                 {#if match.competitor1}
                   <div class="competitor p-3 rounded-md border-2 transition-all duration-200 {match.winner?.id === match.competitor1.id ? 'border-slate-400 bg-slate-100' : 'border-slate-200 bg-slate-50'}">
@@ -234,8 +234,7 @@
                   </div>
                 {/if}
               </div>
-            </button>
-          </div>
+          </button>
         {/each}
       </div>
     </div>
@@ -244,7 +243,7 @@
 
 <!-- Match Detail Dialog -->
 <Dialog.Root bind:open={showMatchDialog}>
-  <Dialog.Content class="max-w-6xl sm:max-w-screen w-[90%]">
+  <Dialog.Content class={`max-w-6xl sm:max-w-screen w-[90%]`}>
     <Dialog.Header>
       <Dialog.Title>
         {selectedMatch.roundName} - Match {selectedMatch.matchNumber}
@@ -255,11 +254,8 @@
       <!-- Match Status -->
       {#if selectedMatch.isCorrect !== null}
         <div class="text-center p-4 rounded-lg {selectedMatch.isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border">
-          <div class="text-2xl mb-2">
-            {selectedMatch.isCorrect ? '✅' : '❌'}
-          </div>
-          <div class="font-semibold text-lg {selectedMatch.isCorrect ? 'text-green-800' : 'text-red-800'}">
-            {selectedMatch.isCorrect ? 'Correct Prediction!' : 'Incorrect Prediction'}
+          <div class="font-semibold text-sm {selectedMatch.isCorrect ? 'text-green-800' : 'text-red-800'}">
+            {selectedMatch.isCorrect ? '✅ Correct Prediction!' : '❌ Incorrect Prediction'}
           </div>
         </div>
       {/if}
@@ -278,7 +274,7 @@
               <img 
                 src="{bear1.image}" 
                 alt="{bear1.name}"
-                class="w-full max-w-sm rounded-lg shadow-md object-cover"
+                class="w-full max-w-sm rounded-lg object-cover"
               />
             </div>
             
@@ -311,7 +307,7 @@
               <img 
                 src="{bear2.image}" 
                 alt="{bear2.name}"
-                class="w-full max-w-sm rounded-lg shadow-md object-cover"
+                class="w-full max-w-sm object-cover"
               />
             </div>
             
