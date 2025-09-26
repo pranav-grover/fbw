@@ -52,19 +52,25 @@
 				<tbody>
 					{#each playerScores as player, index}
 						{@const breakdown = getPredictionBreakdown(player)}
+						{@const isFirstInTie = index === 0 || playerScores[index - 1].totalScore !== player.totalScore}
+						{@const actualRank = playerScores.findIndex(p => p.totalScore === player.totalScore) + 1}
 						<tr 
-							class="border-t hover:bg-blue-50 cursor-pointer transition-colors {index === 0 ? 'bg-yellow-50 hover:bg-yellow-100' : ''}"
+							class="border-t hover:bg-blue-50 cursor-pointer transition-colors {actualRank === 1 ? 'bg-yellow-50 hover:bg-yellow-100' : ''}"
 							onclick={() => showPlayerBracket(player.playerName)}
 						>
-							<td class="p-4">
-								{#if index === 0}
-									<span class="text-2xl">🥇</span>
-								{:else if index === 1}
-									<span class="text-2xl">🥈</span>
-								{:else if index === 2}
-									<span class="text-2xl">🥉</span>
+							<td class="p-4 text-center">
+								{#if isFirstInTie}
+									{#if actualRank === 1}
+										<span class="text-2xl">🥇</span>
+									{:else if actualRank === 2}
+										<span class="text-2xl">🥈</span>
+									{:else if actualRank === 3}
+										<span class="text-2xl">🥉</span>
+									{:else}
+										<span class="text-slate-500 font-medium">#{actualRank}</span>
+									{/if}
 								{:else}
-									<span class="text-slate-500 font-medium">#{index + 1}</span>
+									<span class="text-slate-400 text-sm">—</span>
 								{/if}
 							</td>
 							<td class="p-4">
