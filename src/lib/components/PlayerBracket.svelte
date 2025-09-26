@@ -1,243 +1,110 @@
 <script lang="ts">
-  import { tournamentWinners, bearImages, bearDisplayNames } from '$lib/data/winners';
-  import { calculatePlayerScore, getPredictionBreakdown } from '$lib/data/scoring';
+  import { tournamentStructure } from '$lib/data/tournament';
+  import { bears, getBear, findBear } from '$lib/data/bears';
+  import { calculatePlayerScore, getLegacyRoundBreakdown } from '$lib/data/scoring';
+  import type { PlayerPredictions } from '$lib/data/players';
   import Button from '$lib/components/ui/button/button.svelte';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   
-  interface Competitor {
-    id: number;
-    name: string;
-  }
-  
-  interface Match {
+  interface MatchDisplay {
     id: string;
-    competitor1: Competitor | null;
-    competitor2: Competitor | null;
-    winner: Competitor | null;
-    playerPick?: Competitor | null;
-    isCorrect?: boolean | null;
+    competitor1: { id: string, name: string } | null;
+    competitor2: { id: string, name: string } | null;
+    winner: { id: string, name: string } | null;
+    playerPick: { id: string, name: string } | null;
+    isCorrect: boolean | null;
   }
 
   // Get player data
-  let { player } = $props<{ player: any }>();
+  let { player } = $props<{ player: PlayerPredictions }>();
   
-  let playerScore = player ? calculatePlayerScore(player) : null;
-  let breakdown = playerScore ? getPredictionBreakdown(playerScore) : null;
-
+  let playerScore = calculatePlayerScore(player);
+  let breakdown = getLegacyRoundBreakdown(playerScore);
+  
   // Match dialog state
   let showMatchDialog = $state(false);
   let selectedMatch = $state({
     id: '',
-    competitor1: null as Competitor | null,
-    competitor2: null as Competitor | null,
-    winner: null as Competitor | null,
-    playerPick: null as Competitor | null,
+    competitor1: null as { id: string, name: string } | null,
+    competitor2: null as { id: string, name: string } | null,
+    winner: null as { id: string, name: string } | null,
+    playerPick: null as { id: string, name: string } | null,
     isCorrect: null as boolean | null,
     roundName: '',
     matchNumber: 0
   });
-  
-  // Initial 12 competitors
-  let initialCompetitors: Competitor[] = [
-    { id: 0, name: '128 Jr' },
-    { id: 1, name: '609' },
-    { id: 2, name: '26' },
-    { id: 3, name: '909' },
-    { id: 4, name: '503' },
-    { id: 5, name: '901' },
-    { id: 6, name: '99' },
-    { id: 7, name: '856' },
-    { id: 8, name: '32' },
-    { id: 9, name: '602' },
-    { id: 10, name: '910' },
-    { id: 11, name: '128' }
-  ];
-  
-  // Helper function to get competitor by name
-  const getCompetitorByName = (name: string): Competitor | null => {
-    return initialCompetitors.find(comp => comp.name === name) || null;
-  };
-  
-  // Helper function to get actual winner by round and match index
-  const getActualWinner = (round: number, matchIndex: number): Competitor | null => {
-    if (round === 1) {
-      // Round 1 has 4 matches, but only first 4 competitors advance
-      if (matchIndex < tournamentWinners.round1Winners.length) {
-        const winnerId = tournamentWinners.round1Winners[matchIndex];
-        return initialCompetitors.find(c => c.id === winnerId) || null;
-      }
-    } else if (round === 2) {
-      // Round 2 (quarterfinals) - includes byes
-      if (matchIndex < tournamentWinners.round2Winners.length) {
-        const winnerId = tournamentWinners.round2Winners[matchIndex];
-        return initialCompetitors.find(c => c.id === winnerId) || null;
-      }
-    } else if (round === 3) {
-      // Round 3 (semifinals)
-      if (matchIndex < tournamentWinners.round3Winners.length) {
-        const winnerId = tournamentWinners.round3Winners[matchIndex];
-        return initialCompetitors.find(c => c.id === winnerId) || null;
-      }
-    } else if (round === 4) {
-      // Round 4 (finals)
-      if (matchIndex === 0) {
-        const winnerId = tournamentWinners.round4Winner;
-        return initialCompetitors.find(c => c.id === winnerId) || null;
-      }
+
+  // Helper function to convert bear ID to display format
+  function bearToCompetitor(bearId: string): { id: string, name: string } | null {
+    if (!bearId || bearId === '') return null;
+    try {
+      const bear = getBear(bearId);
+      return { id: bearId, name: bear.shortName };
+    } catch (error) {
+      console.warn(`Bear not found for ID: ${bearId}`);
+      return null;
     }
-    return null;
-  };
+  }
   
-  // Helper function to get player pick by round and match index
-  const getPlayerPick = (round: number, matchIndex: number): Competitor | null => {
-    if (!player?.picks) return null;
+  // Helper function to get player pick for a specific match
+  function getPlayerPick(roundId: string, matchIndex: number): { id: string, name: string } | null {
+    const predictions = player.predictions[roundId];
+    if (!predictions || !predictions[matchIndex] || predictions[matchIndex] === '') return null;
     
-    if (round === 1) {
-      if (matchIndex < player.picks.round1Winners.length) {
-        const pickId = player.picks.round1Winners[matchIndex];
-        return initialCompetitors.find(c => c.id === pickId) || null;
-      }
-    } else if (round === 2) {
-      if (matchIndex < player.picks.round2Winners.length) {
-        const pickId = player.picks.round2Winners[matchIndex];
-        return initialCompetitors.find(c => c.id === pickId) || null;
-      }
-    } else if (round === 3) {
-      if (matchIndex < player.picks.round3Winners.length) {
-        const pickId = player.picks.round3Winners[matchIndex];
-        return initialCompetitors.find(c => c.id === pickId) || null;
-      }
-    } else if (round === 4) {
-      if (matchIndex === 0) {
-        const pickId = player.picks.round4Winner;
-        return initialCompetitors.find(c => c.id === pickId) || null;
-      }
-    }
-    return null;
-  };
+    return bearToCompetitor(predictions[matchIndex]);
+  }
   
   // Helper function to check if prediction is correct
-  const isPredictionCorrect = (round: number, matchIndex: number): boolean | null => {
-    const actualWinner = getActualWinner(round, matchIndex);
-    const playerPick = getPlayerPick(round, matchIndex);
-    if (!actualWinner || !playerPick) return null;
-    return actualWinner.id === playerPick.id;
-  };
+  function isPredictionCorrect(roundId: string, matchIndex: number): boolean | null {
+    const matches = tournamentStructure.matches[roundId];
+    if (!matches || !matches[matchIndex]) return null;
+    
+    const actualWinner = matches[matchIndex].winner;
+    const playerPrediction = player.predictions[roundId]?.[matchIndex];
+    
+    if (!actualWinner || actualWinner === '' || !playerPrediction || playerPrediction === '') return null;
+    return actualWinner === playerPrediction;
+  }
   
-  // Create bracket structure - this represents what the player chose for each round
-  const bracket = {
-    round1: [
-      {
-        id: 'round1_match1',
-        competitor1: initialCompetitors[0], // 128Jr
-        competitor2: initialCompetitors[1], // 609
-        winner: getActualWinner(1, 0),
-        playerPick: getPlayerPick(1, 0),
-        isCorrect: isPredictionCorrect(1, 0)
-      },
-      {
-        id: 'round1_match2',
-        competitor1: initialCompetitors[2], // 26
-        competitor2: initialCompetitors[3], // 909
-        winner: getActualWinner(1, 1),
-        playerPick: getPlayerPick(1, 1),
-        isCorrect: isPredictionCorrect(1, 1)
-      },
-      {
-        id: 'round1_match3',
-        competitor1: initialCompetitors[4], // 503
-        competitor2: initialCompetitors[5], // 901
-        winner: getActualWinner(1, 2),
-        playerPick: getPlayerPick(1, 2),
-        isCorrect: isPredictionCorrect(1, 2)
-      },
-      {
-        id: 'round1_match4',
-        competitor1: initialCompetitors[6], // 99
-        competitor2: initialCompetitors[7], // 856
-        winner: getActualWinner(1, 3),
-        playerPick: getPlayerPick(1, 3),
-        isCorrect: isPredictionCorrect(1, 3)
-      }
-    ],
-    round2: [
-      {
-        id: 'round2_match1',
-        competitor1: initialCompetitors[9], // 602 (bye from R1)
-        competitor2: getActualWinner(1, 0), // Winner of 128Jr vs 609
-        winner: getActualWinner(2, 0),
-        playerPick: getPlayerPick(2, 0),
-        isCorrect: isPredictionCorrect(2, 0)
-      },
-      {
-        id: 'round2_match2',
-        competitor1: initialCompetitors[11], // 128 (bye from R1)
-        competitor2: getActualWinner(1, 1), // Winner of 26 vs 909
-        winner: getActualWinner(2, 1),
-        playerPick: getPlayerPick(2, 1),
-        isCorrect: isPredictionCorrect(2, 1)
-      },
-      {
-        id: 'round2_match3',
-        competitor1: initialCompetitors[8], // 32 (bye from R1)
-        competitor2: getActualWinner(1, 2), // Winner of 503 vs 901
-        winner: getActualWinner(2, 2),
-        playerPick: getPlayerPick(2, 2),
-        isCorrect: isPredictionCorrect(2, 2)
-      },
-      {
-        id: 'round2_match4',
-        competitor1: initialCompetitors[10], // 910 (bye from R1)
-        competitor2: getActualWinner(1, 3), // Winner of 99 vs 856
-        winner: getActualWinner(2, 3),
-        playerPick: getPlayerPick(2, 3),
-        isCorrect: isPredictionCorrect(2, 3)
-      }
-    ],
-    round3: [
-      {
-        id: 'round3_match1',
-        competitor1: getActualWinner(2, 0), // Winner of round2_match1
-        competitor2: getActualWinner(2, 2), // Winner of round2_match2
-        winner: getActualWinner(3, 0),
-        playerPick: getPlayerPick(3, 0),
-        isCorrect: isPredictionCorrect(3, 0)
-      },
-      {
-        id: 'round3_match2',
-        competitor1: getActualWinner(2, 1), // Winner of round2_match3
-        competitor2: getActualWinner(2, 4), // Winner of round2_match4
-        winner: getActualWinner(3, 1),
-        playerPick: getPlayerPick(3, 1),
-        isCorrect: isPredictionCorrect(3, 1)
-      }
-    ],
-    round4: [
-      {
-        id: 'round4_match1',
-        competitor1: getActualWinner(3, 0), // Winner of round3_match1
-        competitor2: getActualWinner(3, 1), // Winner of round3_match2
-        winner: getActualWinner(4, 0),
-        playerPick: getPlayerPick(4, 0),
-        isCorrect: isPredictionCorrect(4, 0)
-      }
-    ]
-  };
+  // Create bracket structure for display
+  let bracket = $state<Record<string, MatchDisplay[]>>({});
   
-  const rounds: Record<string, string> = {
-    round1: 'Round 1',
-    round2: 'Quarterfinals', 
-    round3: 'Semifinals',
-    round4: 'Finals'
-  };
+  // Initialize bracket when component mounts
+  function initializeBracket() {
+    const result: Record<string, MatchDisplay[]> = {};
+    
+    tournamentStructure.rounds.forEach(round => {
+      const matches = tournamentStructure.matches[round.id] || [];
+      
+      result[round.id] = matches.map((match, index) => ({
+        id: match.id,
+        competitor1: bearToCompetitor(match.competitor1),
+        competitor2: bearToCompetitor(match.competitor2),
+        winner: bearToCompetitor(match.winner),
+        playerPick: getPlayerPick(round.id, index),
+        isCorrect: isPredictionCorrect(round.id, index)
+      }));
+    });
+    
+    bracket = result;
+  }
   
-  function showMatchModal(match: Match, roundName: string, matchNumber: number) {
+  // Initialize on component mount
+  initializeBracket();
+  
+  // Round names mapping
+  const roundNames: Record<string, string> = {};
+  tournamentStructure.rounds.forEach(round => {
+    roundNames[round.id] = round.name;
+  });
+  
+  function showMatchModal(match: MatchDisplay, roundName: string, matchNumber: number) {
     selectedMatch = {
       id: match.id,
       competitor1: match.competitor1,
       competitor2: match.competitor2,
       winner: match.winner,
-      playerPick: match.playerPick || null,
+      playerPick: match.playerPick,
       isCorrect: match.isCorrect,
       roundName,
       matchNumber: matchNumber + 1
@@ -249,39 +116,37 @@
 <div class="p-4">
   <!-- Player Header -->
   <div class="text-center mb-6">
-    {#if playerScore && breakdown}
-      <div class="bg-white rounded-lg shadow-md p-4 inline-block">
-        <div class="flex items-center gap-6">
+    <div class="bg-white rounded-lg shadow-md p-4 inline-block">
+      <div class="flex items-center gap-6">
+        <div class="text-center">
+          <span class="bg-blue-500 text-white text-lg px-4 py-2 rounded-full font-bold">
+            {player.initials}
+          </span>
+        </div>
+        <div class="text-left">
+          <div class="text-2xl font-bold text-slate-800">{playerScore.totalScore} Points</div>
+          <div class="text-sm text-slate-600">{breakdown.totalCorrect}/{breakdown.totalPossible} Correct Predictions</div>
+        </div>
+        <div class="grid grid-cols-4 gap-2 text-xs">
           <div class="text-center">
-            <span class="bg-blue-500 text-white text-lg px-4 py-2 rounded-full font-bold">
-              {player.initials}
-            </span>
+            <div class="font-medium">R1</div>
+            <div class="{playerScore.round1Score > 0 ? 'text-green-600' : 'text-slate-400'}">{playerScore.round1Score}pts</div>
           </div>
-          <div class="text-left">
-            <div class="text-2xl font-bold text-slate-800">{playerScore.totalScore} Points</div>
-            <div class="text-sm text-slate-600">{breakdown.totalCorrect}/{breakdown.totalPossible} Correct Predictions</div>
+          <div class="text-center">
+            <div class="font-medium">R2</div>
+            <div class="{playerScore.round2Score > 0 ? 'text-green-600' : 'text-slate-400'}">{playerScore.round2Score}pts</div>
           </div>
-          <div class="grid grid-cols-4 gap-2 text-xs">
-            <div class="text-center">
-              <div class="font-medium">R1</div>
-              <div class="{playerScore.round1Score > 0 ? 'text-green-600' : 'text-slate-400'}">{playerScore.round1Score}pts</div>
-            </div>
-            <div class="text-center">
-              <div class="font-medium">R2</div>
-              <div class="{playerScore.round2Score > 0 ? 'text-green-600' : 'text-slate-400'}">{playerScore.round2Score}pts</div>
-            </div>
-            <div class="text-center">
-              <div class="font-medium">R3</div>
-              <div class="{playerScore.round3Score > 0 ? 'text-green-600' : 'text-slate-400'}">{playerScore.round3Score}pts</div>
-            </div>
-            <div class="text-center">
-              <div class="font-medium">R4</div>
-              <div class="{playerScore.round4Score > 0 ? 'text-green-600' : 'text-slate-400'}">{playerScore.round4Score}pts</div>
-            </div>
+          <div class="text-center">
+            <div class="font-medium">R3</div>
+            <div class="{playerScore.round3Score > 0 ? 'text-green-600' : 'text-slate-400'}">{playerScore.round3Score}pts</div>
+          </div>
+          <div class="text-center">
+            <div class="font-medium">R4</div>
+            <div class="{playerScore.round4Score > 0 ? 'text-green-600' : 'text-slate-400'}">{playerScore.round4Score}pts</div>
           </div>
         </div>
       </div>
-    {/if}
+    </div>
   </div>
 
   <!-- Legend -->
@@ -307,12 +172,12 @@
   {#each Object.entries(bracket) as [roundKey, matches]}
     <div class="bracket-round mb-8">
       <h2 class="text-xl font-semibold mb-4 text-slate-700 text-center">
-        {rounds[roundKey]}
+        {roundNames[roundKey]}
       </h2>
       
       <div class="matches-container flex flex-wrap gap-4 justify-center">
         {#each matches as match, matchIndex}
-          <div class="match-card bg-white rounded-lg shadow-md p-4 border-2 border-slate-200 hover:border-slate-300 transition-colors min-w-[300px]">
+          <div class="match-card bg-white rounded-lg shadow-md p-4 border-2 border-slate-200 hover:border-slate-300 transition-colors w-full max-w-md">
             <div class="match-header text-center mb-3">
               <span class="text-sm font-medium text-slate-500 uppercase tracking-wide">Match {matchIndex + 1}</span>
               {#if match.isCorrect !== null}
@@ -324,7 +189,7 @@
             
             <button 
               class="w-full text-left"
-              onclick={() => showMatchModal(match, rounds[roundKey], matchIndex)}
+              onclick={() => showMatchModal(match, roundNames[roundKey], matchIndex)}
             >
               <div class="competitors space-y-2">
                 {#if match.competitor1}
@@ -379,7 +244,7 @@
 
 <!-- Match Detail Dialog -->
 <Dialog.Root bind:open={showMatchDialog}>
-  <Dialog.Content class="max-w-4xl">
+  <Dialog.Content class="max-w-5xl">
     <Dialog.Header>
       <Dialog.Title>
         {selectedMatch.roundName} - Match {selectedMatch.matchNumber}
@@ -403,29 +268,25 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Competitor 1 -->
         {#if selectedMatch.competitor1}
+          {@const bear1 = findBear(selectedMatch.competitor1.id)}
+          {#if bear1}
           <div class="space-y-4">
-            <h3 class="text-lg font-semibold text-center">{selectedMatch.competitor1.name}</h3>
+            <h3 class="text-lg font-semibold text-center">{bear1.name}</h3>
             
             <!-- Bear Image -->
             <div class="w-full flex justify-center">
-              {#if bearImages[selectedMatch.competitor1.id]}
-                <img 
-                  src="{bearImages[selectedMatch.competitor1.id]}" 
-                  alt="{bearDisplayNames[selectedMatch.competitor1.id] || selectedMatch.competitor1.name}"
-                  class="w-full max-w-sm rounded-lg shadow-md object-cover"
-                />
-              {:else}
-                <div class="w-full max-w-sm h-48 bg-slate-200 rounded-lg flex items-center justify-center">
-                  <span class="text-slate-500">No image available</span>
-                </div>
-              {/if}
+              <img 
+                src="{bear1.image}" 
+                alt="{bear1.name}"
+                class="w-full max-w-sm rounded-lg shadow-md object-cover"
+              />
             </div>
             
             <!-- Status Badges -->
             <div class="flex flex-col gap-2 items-center">
               {#if selectedMatch.winner?.id === selectedMatch.competitor1.id}
                 <span class="bg-yellow-500 text-white px-4 py-2 rounded-full font-bold text-sm">
-                  🏆 ACTUAL CHAMPION
+                  🏆 ACTUAL WINNER
                 </span>
               {/if}
               {#if selectedMatch.playerPick?.id === selectedMatch.competitor1.id}
@@ -435,33 +296,30 @@
               {/if}
             </div>
           </div>
+          {/if}
         {/if}
         
         <!-- Competitor 2 -->
         {#if selectedMatch.competitor2}
+          {@const bear2 = findBear(selectedMatch.competitor2.id)}
+          {#if bear2}
           <div class="space-y-4">
-            <h3 class="text-lg font-semibold text-center">{selectedMatch.competitor2.name}</h3>
+            <h3 class="text-lg font-semibold text-center">{bear2.name}</h3>
             
             <!-- Bear Image -->
             <div class="w-full flex justify-center">
-              {#if bearImages[selectedMatch.competitor2.id]}
-                <img 
-                  src="{bearImages[selectedMatch.competitor2.id]}" 
-                  alt="{bearDisplayNames[selectedMatch.competitor2.id] || selectedMatch.competitor2.name}"
-                  class="w-full max-w-sm rounded-lg shadow-md object-cover"
-                />
-              {:else}
-                <div class="w-full max-w-sm h-48 bg-slate-200 rounded-lg flex items-center justify-center">
-                  <span class="text-slate-500">No image available</span>
-                </div>
-              {/if}
+              <img 
+                src="{bear2.image}" 
+                alt="{bear2.name}"
+                class="w-full max-w-sm rounded-lg shadow-md object-cover"
+              />
             </div>
             
             <!-- Status Badges -->
             <div class="flex flex-col gap-2 items-center">
               {#if selectedMatch.winner?.id === selectedMatch.competitor2.id}
                 <span class="bg-yellow-500 text-white px-4 py-2 rounded-full font-bold text-sm">
-                  🏆 ACTUAL CHAMPION
+                  🏆 ACTUAL WINNER
                 </span>
               {/if}
               {#if selectedMatch.playerPick?.id === selectedMatch.competitor2.id}
@@ -471,6 +329,7 @@
               {/if}
             </div>
           </div>
+          {/if}
         {/if}
       </div>
     </div>

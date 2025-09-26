@@ -1,5 +1,5 @@
 <script>
-  import Bracket from '$lib/components/bracket-new.svelte';
+  import Bracket from '$lib/components/bracket.svelte';
 </script>
 
 <Bracket />

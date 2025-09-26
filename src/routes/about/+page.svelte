@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { calculateAllPlayerScores, getPredictionBreakdown } from '$lib/data/scoring';
+  import { calculateAllPlayerScores, getLegacyRoundBreakdown } from '$lib/data/scoring';
   import { players } from '$lib/data/players';
   import PlayerBracket from '$lib/components/PlayerBracket.svelte';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
@@ -10,7 +10,7 @@
   let selectedPlayer = $state(null as any);
   
   function showPlayerBracket(playerName: string) {
-    selectedPlayer = players.find(p => p.name === playerName);
+    selectedPlayer = players.find(p => p.playerName === playerName);
     showPlayerBracketDialog = true;
   }
 </script>
@@ -51,20 +51,26 @@
 				</thead>
 				<tbody>
 					{#each playerScores as player, index}
-						{@const breakdown = getPredictionBreakdown(player)}
+						{@const breakdown = getLegacyRoundBreakdown(player)}
+						{@const isFirstInTie = index === 0 || playerScores[index - 1].totalScore !== player.totalScore}
+						{@const actualRank = playerScores.findIndex(p => p.totalScore === player.totalScore) + 1}
 						<tr 
-							class="border-t hover:bg-blue-50 cursor-pointer transition-colors {index === 0 ? 'bg-yellow-50 hover:bg-yellow-100' : ''}"
+							class="border-t hover:bg-blue-50 cursor-pointer transition-colors {actualRank === 1 ? 'bg-yellow-50 hover:bg-yellow-100' : ''}"
 							onclick={() => showPlayerBracket(player.playerName)}
 						>
-							<td class="p-4">
-								{#if index === 0}
-									<span class="text-2xl">🥇</span>
-								{:else if index === 1}
-									<span class="text-2xl">🥈</span>
-								{:else if index === 2}
-									<span class="text-2xl">🥉</span>
+							<td class="p-4 text-center">
+								{#if isFirstInTie}
+									{#if actualRank === 1}
+										<span class="text-2xl">🥇</span>
+									{:else if actualRank === 2}
+										<span class="text-2xl">🥈</span>
+									{:else if actualRank === 3}
+										<span class="text-2xl">🥉</span>
+									{:else}
+										<span class="text-slate-500 font-medium">#{actualRank}</span>
+									{/if}
 								{:else}
-									<span class="text-slate-500 font-medium">#{index + 1}</span>
+									<span class="text-slate-400 text-sm">—</span>
 								{/if}
 							</td>
 							<td class="p-4">
@@ -80,32 +86,32 @@
 							<td class="p-4 text-center">
 								<div class="flex flex-col items-center">
 									<span class="text-sm text-slate-600">{breakdown.round1}</span>
-									<span class="font-bold {player.round1Score > 0 ? 'text-green-600' : 'text-slate-400'}">
-										{player.round1Score} pts
+									<span class="font-bold {player.roundScores.round1 > 0 ? 'text-green-600' : 'text-slate-400'}">
+										{player.roundScores.round1} pts
 									</span>
 								</div>
 							</td>
 							<td class="p-4 text-center">
 								<div class="flex flex-col items-center">
 									<span class="text-sm text-slate-600">{breakdown.round2}</span>
-									<span class="font-bold {player.round2Score > 0 ? 'text-green-600' : 'text-slate-400'}">
-										{player.round2Score} pts
+									<span class="font-bold {player.roundScores.quarterfinals > 0 ? 'text-green-600' : 'text-slate-400'}">
+										{player.roundScores.quarterfinals} pts
 									</span>
 								</div>
 							</td>
 							<td class="p-4 text-center">
 								<div class="flex flex-col items-center">
 									<span class="text-sm text-slate-600">{breakdown.round3}</span>
-									<span class="font-bold {player.round3Score > 0 ? 'text-green-600' : 'text-slate-400'}">
-										{player.round3Score} pts
+									<span class="font-bold {player.roundScores.semifinals > 0 ? 'text-green-600' : 'text-slate-400'}">
+										{player.roundScores.semifinals} pts
 									</span>
 								</div>
 							</td>
 							<td class="p-4 text-center">
 								<div class="flex flex-col items-center">
 									<span class="text-sm text-slate-600">{breakdown.round4}</span>
-									<span class="font-bold {player.round4Score > 0 ? 'text-green-600' : 'text-slate-400'}">
-										{player.round4Score} pts
+									<span class="font-bold {player.roundScores.finals > 0 ? 'text-green-600' : 'text-slate-400'}">
+										{player.roundScores.finals} pts
 									</span>
 								</div>
 							</td>
@@ -153,7 +159,7 @@
 		<Dialog.Header>
 			<Dialog.Title>
 				{#if selectedPlayer}
-					{selectedPlayer.name}'s Bracket
+					{selectedPlayer.playerName}'s Bracket
 				{/if}
 			</Dialog.Title>
 		</Dialog.Header>

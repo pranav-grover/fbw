@@ -1,81 +1,93 @@
-import { tournamentWinners } from './winners.js';
-import { players, type PlayerResults } from './players.js';
+// New scoring system - works with generic tournament structure
+
+import { tournamentStructure } from './tournament.js';
+import { players, type PlayerPredictions } from './players.js';
 
 export interface PlayerScore {
   playerId: number;
   playerName: string;
   initials: string;
+  roundScores: Record<string, number>;    // score for each round by round ID
+  totalScore: number;
+  correctPredictions: Record<string, number>; // count of correct predictions per round
+  totalCorrect: number;
+  totalPossible: number;
+  championCorrect: boolean;
+  // Legacy properties for backward compatibility
   round1Score: number;
   round2Score: number;
   round3Score: number;
   round4Score: number;
-  totalScore: number;
-  correctPredictions: {
-    round1: number[];
-    round2: number[];
-    round3: number[];
-    round4: boolean;
-  };
 }
 
 /**
  * Calculate the score for a single player based on their predictions vs actual results
  */
-export function calculatePlayerScore(player: PlayerResults): PlayerScore {
-  let round1Score = 0;
-  let round2Score = 0;
-  let round3Score = 0;
-  let round4Score = 0;
-  
-  const correctPredictions = {
-    round1: [] as number[],
-    round2: [] as number[],
-    round3: [] as number[],
-    round4: false
-  };
+export function calculatePlayerScore(player: PlayerPredictions): PlayerScore {
+  const roundScores: Record<string, number> = {};
+  const correctPredictions: Record<string, number> = {};
+  let totalScore = 0;
+  let totalCorrect = 0;
+  let totalPossible = 0;
 
-  // Round 1: 1 point each (4 matches)
-  player.picks.round1Winners.forEach((pick, index) => {
-    if (pick === tournamentWinners.round1Winners[index]) {
-      round1Score += 1;
-      correctPredictions.round1.push(index);
-    }
-  });
-
-  // Round 2: 2 points each (4 matches) 
-  player.picks.round2Winners.forEach((pick, index) => {
-    if (pick === tournamentWinners.round2Winners[index]) {
-      round2Score += 2;
-      correctPredictions.round2.push(index);
-    }
-  });
-
-  // Round 3: 4 points each (2 matches)
-  player.picks.round3Winners.forEach((pick, index) => {
-    if (pick === tournamentWinners.round3Winners[index]) {
-      round3Score += 4;
-      correctPredictions.round3.push(index);
-    }
-  });
-
-  // Round 4: 8 points (1 match - finals winner)
-  if (player.picks.round4Winner === tournamentWinners.round4Winner) {
-    round4Score += 8;
-    correctPredictions.round4 = true;
+  // Calculate scores for each round
+  for (const round of tournamentStructure.rounds) {
+    const roundId = round.id;
+    const roundMatches = tournamentStructure.matches[roundId] || [];
+    const playerPredictionsForRound = player.predictions[roundId] || [];
+    
+    let roundScore = 0;
+    let roundCorrect = 0;
+    
+    // Check each match in this round
+    roundMatches.forEach((match, matchIndex) => {
+      totalPossible++;
+      
+      // Get player's prediction for this match
+      const playerPrediction = playerPredictionsForRound[matchIndex];
+      
+      // Check if prediction matches actual winner
+      if (playerPrediction && match.winner && playerPrediction === match.winner) {
+        roundScore += round.pointValue;
+        roundCorrect++;
+        totalCorrect++;
+      }
+    });
+    
+    roundScores[roundId] = roundScore;
+    correctPredictions[roundId] = roundCorrect;
+    totalScore += roundScore;
   }
 
-  const totalScore = round1Score + round2Score + round3Score + round4Score;
+  // Check champion prediction
+  const championCorrect = player.championPick === tournamentStructure.champion;
+  if (tournamentStructure.champion) {
+    totalPossible++; // Only add to possible if champion has been determined
+    if (championCorrect) {
+      totalCorrect++;
+    }
+  }
+
+  // Legacy properties for backward compatibility
+  const round1Score = roundScores['round1'] || 0;
+  const round2Score = roundScores['quarterfinals'] || 0;
+  const round3Score = roundScores['semifinals'] || 0;
+  const round4Score = roundScores['finals'] || 0;
 
   return {
     playerId: player.id,
-    playerName: player.name,
+    playerName: player.playerName,
     initials: player.initials,
+    roundScores,
+    totalScore,
+    correctPredictions,
+    totalCorrect,
+    totalPossible,
+    championCorrect,
     round1Score,
     round2Score,
     round3Score,
-    round4Score,
-    totalScore,
-    correctPredictions
+    round4Score
   };
 }
 
@@ -89,20 +101,90 @@ export function calculateAllPlayerScores(): PlayerScore[] {
 }
 
 /**
- * Get detailed breakdown of correct predictions for display
+ * Get detailed breakdown of correct predictions for display (backward compatibility)
  */
 export function getPredictionBreakdown(playerScore: PlayerScore) {
-  const breakdown = {
-    round1: `${playerScore.correctPredictions.round1.length}/4`,
-    round2: `${playerScore.correctPredictions.round2.length}/4`, 
-    round3: `${playerScore.correctPredictions.round3.length}/2`,
-    round4: playerScore.correctPredictions.round4 ? '1/1' : '0/1',
-    totalCorrect: playerScore.correctPredictions.round1.length + 
-                  playerScore.correctPredictions.round2.length + 
-                  playerScore.correctPredictions.round3.length + 
-                  (playerScore.correctPredictions.round4 ? 1 : 0),
-    totalPossible: 11 // 4 + 4 + 2 + 1
-  };
+  const rounds = tournamentStructure.rounds;
   
+  // Create breakdown object with round-specific data
+  const breakdown: Record<string, string | number> & { 
+    totalCorrect: number; 
+    totalPossible: number;
+    championStatus?: string;
+  } = {
+    totalCorrect: playerScore.totalCorrect,
+    totalPossible: playerScore.totalPossible
+  };
+
+  // Add breakdown for each round
+  rounds.forEach(round => {
+    const roundId = round.id;
+    const roundMatches = tournamentStructure.matches[roundId] || [];
+    const correctCount = playerScore.correctPredictions[roundId] || 0;
+    const totalMatches = roundMatches.length;
+    
+    breakdown[roundId] = `${correctCount}/${totalMatches}`;
+  });
+
+  // Add champion status if determined
+  if (tournamentStructure.champion) {
+    breakdown.championStatus = playerScore.championCorrect ? '1/1' : '0/1';
+  }
+
   return breakdown;
+}
+
+/**
+ * Get the legacy round breakdown format for backward compatibility with existing UI
+ */
+export function getLegacyRoundBreakdown(playerScore: PlayerScore) {
+  const rounds = tournamentStructure.rounds;
+  
+  // Map new round structure to legacy naming
+  const legacyMapping: Record<string, string> = {
+    'round1': 'round1',
+    'quarterfinals': 'round2', 
+    'semifinals': 'round3',
+    'finals': 'round4'
+  };
+
+  const legacy: Record<string, string | number> & {
+    totalCorrect: number;
+    totalPossible: number;
+  } = {
+    totalCorrect: playerScore.totalCorrect,
+    totalPossible: playerScore.totalPossible
+  };
+
+  rounds.forEach(round => {
+    const legacyKey = legacyMapping[round.id];
+    if (legacyKey) {
+      const roundMatches = tournamentStructure.matches[round.id] || [];
+      const correctCount = playerScore.correctPredictions[round.id] || 0;
+      const totalMatches = roundMatches.length;
+      
+      legacy[legacyKey] = `${correctCount}/${totalMatches}`;
+    }
+  });
+
+  return legacy;
+}
+
+/**
+ * Get players who correctly predicted a specific match outcome
+ */
+export function getPlayersWithCorrectPrediction(roundId: string, matchIndex: number, winnerId: string): PlayerPredictions[] {
+  return players.filter(player => {
+    const roundPredictions = player.predictions[roundId];
+    return roundPredictions && roundPredictions[matchIndex] === winnerId;
+  });
+}
+
+/**
+ * Get players who correctly predicted the champion
+ */
+export function getPlayersWithCorrectChampionPrediction(): PlayerPredictions[] {
+  if (!tournamentStructure.champion) return [];
+  
+  return players.filter(player => player.championPick === tournamentStructure.champion);
 }

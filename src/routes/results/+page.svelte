@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { calculateAllPlayerScores, getLegacyRoundBreakdown } from '$lib/data/scoring-new';
-  import { players } from '$lib/data/players-new';
-  import PlayerBracket from '$lib/components/PlayerBracket-new.svelte';
+  import { calculateAllPlayerScores, getLegacyRoundBreakdown } from '$lib/data/scoring';
+  import { players } from '$lib/data/players';
+  import PlayerBracket from '$lib/components/PlayerBracket.svelte';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import Button from '$lib/components/ui/button/button.svelte';
   
