@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { calculateAllPlayerScores, getPredictionBreakdown } from '$lib/data/scoring';
-  import { players } from '$lib/data/players';
-  import PlayerBracket from '$lib/components/PlayerBracket.svelte';
+  import { calculateAllPlayerScores, getLegacyRoundBreakdown } from '$lib/data/scoring-new';
+  import { players } from '$lib/data/players-new';
+  import PlayerBracket from '$lib/components/PlayerBracket-new.svelte';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import Button from '$lib/components/ui/button/button.svelte';
   
@@ -10,7 +10,7 @@
   let selectedPlayer = $state(null as any);
   
   function showPlayerBracket(playerName: string) {
-    selectedPlayer = players.find(p => p.name === playerName);
+    selectedPlayer = players.find(p => p.playerName === playerName);
     showPlayerBracketDialog = true;
   }
 </script>
@@ -51,7 +51,7 @@
 				</thead>
 				<tbody>
 					{#each playerScores as player, index}
-						{@const breakdown = getPredictionBreakdown(player)}
+						{@const breakdown = getLegacyRoundBreakdown(player)}
 						{@const isFirstInTie = index === 0 || playerScores[index - 1].totalScore !== player.totalScore}
 						{@const actualRank = playerScores.findIndex(p => p.totalScore === player.totalScore) + 1}
 						<tr 
@@ -155,11 +155,11 @@
 
 <!-- Player Bracket Dialog -->
 <Dialog.Root bind:open={showPlayerBracketDialog}>
-	<Dialog.Content class="max-w-6xl max-h-[90vh] overflow-y-auto">
+	<Dialog.Content class="max-w-7xl max-h-[90vh] overflow-y-auto">
 		<Dialog.Header>
 			<Dialog.Title>
 				{#if selectedPlayer}
-					{selectedPlayer.name}'s Bracket
+					{selectedPlayer.playerName}'s Bracket
 				{/if}
 			</Dialog.Title>
 		</Dialog.Header>
