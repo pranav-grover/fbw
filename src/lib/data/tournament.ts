@@ -83,7 +83,7 @@ export const tournamentStructure: TournamentStructure = {
         id: 'quarters_match2',
         competitor1: '128',    // Had a bye in round 1  
         competitor2: '909',    // Winner from round1_match2
-        winner: '' // To be determined
+        winner: '128' // To be determined
       },
       {
         id: 'quarters_match3',
@@ -95,7 +95,7 @@ export const tournamentStructure: TournamentStructure = {
         id: 'quarters_match4',
         competitor1: '910',    // Had a bye in round 1
         competitor2: '856',    // Winner from round1_match4
-        winner: '' // To be determined
+        winner: '856' // To be determined
       }
     ],
     // Semifinals
@@ -103,13 +103,13 @@ export const tournamentStructure: TournamentStructure = {
       {
         id: 'semis_match1',
         competitor1: '602',    // Winner from quarters_match1
-        competitor2: '32',       // Winner from quarters_match2 (TBD)
+        competitor2: '32',       // Winner from quarters_match3 (TBD)
         winner: '' // To be determined
       },
       {
         id: 'semis_match2', 
-        competitor1: '',     // Winner from quarters_match3
-        competitor2: '',       // Winner from quarters_match4 (TBD)
+        competitor1: '128',     // Winner from quarters_match2
+        competitor2: '856',       // Winner from quarters_match4 (TBD)
         winner: '' // To be determined
       }
     ],
