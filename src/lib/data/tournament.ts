@@ -117,8 +117,8 @@ export const tournamentStructure: TournamentStructure = {
     finals: [
       {
         id: 'finals_match1',
-        competitor1: '',       // Winner from semis_match1 (TBD)
-        competitor2: '',       // Winner from semis_match2 (TBD)
+        competitor1: '32',       // Winner from semis_match1 (TBD)
+        competitor2: '856',       // Winner from semis_match2 (TBD)
         winner: '' // To be determined
       }
     ]
