@@ -119,11 +119,11 @@ export const tournamentStructure: TournamentStructure = {
         id: 'finals_match1',
         competitor1: '32',       // Winner from semis_match1 (TBD)
         competitor2: '856',       // Winner from semis_match2 (TBD)
-        winner: '' // To be determined
+        winner: '32' // To be determined
       }
     ]
   },
-  champion: null // Overall champion (TBD)
+  champion: '32' // Overall champion (TBD)
 };
 
 // Helper functions for easy data access
