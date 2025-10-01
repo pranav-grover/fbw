@@ -15,7 +15,7 @@ export const players: PlayerPredictions[] = [
     id: 1,
     predictions: {
       round1: ['609', '909', '901', '856'],           // [1, 3, 5, 7] from old system
-      quarterfinals: ['602', '32', '128', '856'],     // [8, 10, 9, 7] from old system  
+      quarterfinals: ['602', '128', '32', '856'],     // [8, 10, 9, 7] from old system  
       semifinals: ['32', '856'],                      // [10, 7] from old system
       finals: ['32']                                  // [10] from old system
     },
